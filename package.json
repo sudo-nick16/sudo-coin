@@ -1,0 +1,14 @@
+{
+  "name": "sudo-coin",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "server": "yarn workspace server",
+    "web": "yarn workspace web"
+  }
+}

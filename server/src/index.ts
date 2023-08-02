@@ -4,6 +4,7 @@ import { MONGO_URI, ORIGIN, PORT } from "./constants";
 import cookieParser from "cookie-parser";
 import mountRoutes from "./mount-routes";
 import cors from "cors";
+import { getScrapedCoinInfo } from "./scraper";
 
 async function main() {
   const app = express();
@@ -14,6 +15,8 @@ async function main() {
     origin: ORIGIN,
     credentials: true,
   }));
+
+  console.log(await getScrapedCoinInfo("bitcoin"));
 
   try {
     await mongoose.connect(MONGO_URI, {

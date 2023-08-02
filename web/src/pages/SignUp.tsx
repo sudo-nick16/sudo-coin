@@ -16,7 +16,7 @@ const SignUp = () => {
   const user = useSelector<RootState, RootState["auth"]>((state) => state.auth);
 
   if (user.user && user.accessToken) {
-    <Navigate to="/" replace={true} />
+    return <Navigate to="/" replace={true} />
   }
 
   const handleSignup = async () => {

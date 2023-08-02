@@ -2,7 +2,7 @@ import { ReactElement, useEffect, useState } from "react";
 import Container from "../components/Container";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
-import { Coin } from "../types";
+import { ScrapedCoin } from "../types";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { PiDotFill } from "react-icons/pi";
 import { HiOutlineHome } from "react-icons/hi";
@@ -31,7 +31,7 @@ const PriceDelta = ({ price }: { price: number }) => {
 }
 
 const Dashboard = () => {
-  const [coins, setCoins] = useState<Coin[]>([]);
+  const [coins, setCoins] = useState<ScrapedCoin[]>([]);
   const [loading, setLoading] = useState(true);
   const api = useAxios();
 
@@ -45,15 +45,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchCoins = async () => {
-      if (localStorage.getItem("coins")) {
-        console.log("loaded from cache")
-        setCoins(JSON.parse(localStorage.getItem("coins")!));
-        setLoading(false);
-        return;
-      }
       const res = await axios.get(SERVER_URL + "/coins");
+      console.log(res.data.coins)
       if (res.data.coins) {
-        localStorage.setItem("coins", JSON.stringify(res.data.coins));
         setCoins(res.data.coins);
       }
       setLoading(false);
@@ -88,11 +82,11 @@ const Dashboard = () => {
                       <span className="">{coin.symbol}</span>
                     </div>
                     <div>
-                      <span className="font-bold">${coin.current_price}</span>
-                      <PriceDelta price={coin.price_change_percentage_24h_in_currency} />
+                      <span className="font-bold">${coin.price}</span>
+                      <PriceDelta price={parseFloat(coin.change24h)} />
                     </div>
                     <div className="font-bold">
-                      ${coin.market_cap}
+                      {coin.marketCap}
                     </div>
                     <Button className="hover:bg-white hover:text-dark-2 w-16 h-10" onClick={() => trackCoinHandler(coin.id)}>
                       Track

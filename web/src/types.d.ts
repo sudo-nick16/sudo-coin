@@ -10,11 +10,26 @@ export type Coin = {
   high_24h: number;
 }
 
+export type ScrapedCoin = {
+  id: string;
+  image: string;
+  marketCap: string;
+  name: string;
+  price: string;
+  symbol: string;
+  change1h: string;
+  change7d: string;
+  change24h: string;
+  volume24h: string;
+  sparkLine?: string;
+  marketRank?: string;
+}
+
 export type Tracker = {
   coingeckoId: string;
   user_id: string;
   id: string;
-  coin: Coin;
+  coin: ScrapedCoin;
 }
 
 export type User = {

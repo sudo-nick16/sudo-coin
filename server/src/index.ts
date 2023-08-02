@@ -6,6 +6,7 @@ import mountRoutes from "./mount-routes";
 import cors from "cors";
 import { getScrapedCoinInfo } from "./scraper";
 import limitTrackerModel from "./models/limit-tracker";
+import { init_cron } from "./daily-update-cron";
 
 var client: { [key: string]: Response } = {}
 
@@ -55,6 +56,8 @@ async function main() {
   app.listen(PORT, () => {
     console.log("running on port:", PORT);
   })
+
+  init_cron();
 }
 
 main();

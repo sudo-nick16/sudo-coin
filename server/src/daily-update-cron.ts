@@ -3,14 +3,13 @@ import mongoose from "mongoose";
 import { MONGO_URI, SMTP_PASS, SMTP_USER } from "./constants";
 import userModel from "./models/user";
 import trackerModel from "./models/tracker";
-import { ScrapedCoin, Tracker } from "./types";
+import { ScrapedCoin } from "./types";
 import { getScrapedCoinInfo } from "./scraper";
 import cron from "node-cron";
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.forwardemail.net",
-  port: 465,
-  secure: true,
+  host: "smtp.gmail.com",
+  port: 587,
   auth: {
     user: SMTP_USER,
     pass: SMTP_PASS
@@ -29,16 +28,30 @@ async function sendMail(to: string, body: string) {
 
 const getCoinHtml = (coin: ScrapedCoin) => {
   return `
-  <div style='display: flex;'>
-    <div style='display: flex; flex-direction: column;'>
-      <img src=${coin.image} /> 
-      <h2>${coin.name}</h2>
-    </div>
-    <div style='display: flex; flex-direction: column;'>
-      <span>Price: ${coin.price}</span>
-      <span>Change 24h: ${coin.change24h}</span>
-    </div> 
-  <div>
+  <tr>
+    <td>
+      <img src=${coin.image} style='height: 30px; width: 30px;' /> 
+    </td>
+    <td>
+      <h2><strong>${coin.name}</strong></h2>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <strong>Price:</strong>
+    </td> 
+    <td>
+       ${coin.price}
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <strong>Change 24h:</strong>
+    </td> 
+    <td> 
+      ${coin.change24h}
+    </td>
+  </tr>
   `
 }
 
@@ -56,27 +69,46 @@ async function daily_update() {
     return;
   }
   for (let i = 0; i < users.length; ++i) {
-    const trackers: Tracker[] = await trackerModel.find({ user_id: users[i].id });
+    const trackers = await trackerModel.find({ user_id: users[i].id });
     if (!trackers) {
       continue;
     }
     let body = '';
     for (let j = 0; j < trackers.length; ++j) {
-      const coin = await getScrapedCoinInfo(trackers[j].coingeckoId);
+      const coin = await getScrapedCoinInfo(trackers[j].coingecko_id);
+      console.log(coin);
       if (!coin) {
         continue;
       }
       body += getCoinHtml(coin);
     }
+    body = `
+    <table>
+      <tr>
+        <td>
+          <img src="https://i.ibb.co/wghqyKS/dollar.png" style="height: 50px; width: 50px" />
+        </td>
+        <td>
+          <strong>Sudocoin</strong>
+        </td>
+      </tr>
+      ${body}
+    </table>
+    `
+    console.log(body);
     sendMail(users[i].email, body);
   }
 }
 
-const task = cron.schedule('0 1 * * *', () => {
+const task = cron.schedule('1 * * * * *', () => {
+  console.log("running cron");
   daily_update();
 }, {
   scheduled: true,
   timezone: "Asia/Kolkata"
 });
 
-task.start();
+
+export const init_cron = () => {
+  task.start();
+}

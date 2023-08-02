@@ -22,7 +22,7 @@ export const verifyRefreshToken = (token: string): (TokenPayload | undefined) =>
 }
 
 export const createAccessToken = (payload: TokenPayload): string => {
-  const accessToken = jwt.sign(payload, REFRESH_TOKEN_SECRET, {
+  const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
     algorithm: "HS256",
     expiresIn: 15 * 60 * 1000,
   })

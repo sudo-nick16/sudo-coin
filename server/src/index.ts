@@ -9,13 +9,16 @@ async function main() {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
+  console.log("ORIGIN:", ORIGIN);
   app.use(cors({
     origin: ORIGIN,
     credentials: true,
   }));
 
   try {
-    await mongoose.connect(MONGO_URI)
+    await mongoose.connect(MONGO_URI, {
+      authSource: "admin",
+    });
   } catch (e) {
     console.log("error connecting to mongo:", e.message);
   }

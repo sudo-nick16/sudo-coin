@@ -28,10 +28,17 @@ export const refreshToken = async (req: Request, res: Response) => {
       email: user!.email,
       token_version: user!.token_version,
     });
-    res.send({ error: "", accessToken });
+    res.status(200).json({
+      user: {
+        id: user!.id,
+        email: user!.email,
+        name: user!.name,
+      },
+      accessToken,
+    });
     return;
   } catch (e) {
-    res.send({ error: e.message, accessToken: "" });
+    res.status(500).json({ error: e.message, accessToken: "" });
   }
 };
 
@@ -66,6 +73,11 @@ export const login = async (req: Request, res: Response) => {
       return res.status(200).json({
         message: "login successful",
         accessToken: createAccessToken(payload),
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        }
       });
     }
     return res.status(400).json({ error: "invalid password" });
@@ -76,9 +88,9 @@ export const login = async (req: Request, res: Response) => {
 }
 
 export const register = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: "email or password missing" });
+  const { email, password, name } = req.body;
+  if (!email || !password || !name) {
+    return res.status(400).json({ error: "name or email or password missing" });
   }
   try {
     const user = await userModel.findOne({ email }).exec();
@@ -86,6 +98,7 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "user already exists" });
     }
     const newUser = new userModel({
+      name,
       email,
       password: await hashPassword(password),
     });
@@ -103,6 +116,11 @@ export const register = async (req: Request, res: Response) => {
     return res.status(200).json({
       message: "registration successful",
       accessToken: createAccessToken(payload),
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+      }
     });
   } catch (e) {
     console.log(e);

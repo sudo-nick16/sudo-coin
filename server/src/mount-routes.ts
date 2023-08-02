@@ -1,6 +1,8 @@
 import { Express } from 'express';
-import { login, logout, refreshToken } from './handlers/auth-handlers';
-import { getMe, getUserLimitTracker, getUserTrackers } from './handlers/user-handlers';
+import { login, logout, refreshToken, register } from './handlers/auth-handlers';
+import { createCoinTracker, getMe, getUserLimitTracker, getUserTrackers } from './handlers/user-handlers';
+import { getCoinInfo, getCoinPriceHistory, getTrendingCoins } from './handlers/coin-handlers';
+import { authMiddleware } from './middlewares/auth-middleware';
 
 const mountRoutes = (app: Express) => {
 
@@ -11,14 +13,25 @@ const mountRoutes = (app: Express) => {
   // mount auth routes
 
   app.post('/auth/login', login);
+  app.post('/auth/sign-up', register);
   app.post('/auth/logout', logout);
   app.post('/auth/refresh-token', refreshToken);
 
   // mount user routes
 
-  app.get('/users/me', getMe);
-  app.get('/users/tracker', getUserTrackers);
-  app.get('/users/trackers/limit/:trackerId', getUserLimitTracker);
+  app.get('/users/me', authMiddleware, getMe);
+
+  // mount tracker routes
+
+  app.get('/trackers', authMiddleware, getUserTrackers);
+  app.post('/trackers/:coingeckoId', authMiddleware, createCoinTracker);
+  app.get('/limit-trackers/:trackerId', authMiddleware, getUserLimitTracker);
+
+  // mount coin routes
+
+  app.get("/coins", getTrendingCoins)
+  app.get("/coins/:coinId", getCoinInfo)
+  app.get("/coins/:coinId/history/:days", getCoinPriceHistory)
 }
 
 export default mountRoutes;

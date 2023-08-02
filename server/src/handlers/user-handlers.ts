@@ -11,10 +11,29 @@ export const getMe = async (_: Request, res: Response) => {
 
 export const getUserTrackers = async (_: Request, res: Response) => {
   const user = res.locals.user;
-  const trackers = trackerModel.find({ user_id: user.user_id }).exec();
+  console.log(user);
+  const trackers = await trackerModel.find({ user_id: user.user_id }).exec();
   return res.status(200).json({
     trackers,
   });
+}
+
+export const createCoinTracker = async (req: Request, res: Response) => {
+  const user = res.locals.user;
+  const coingeckoId = req.params.coingeckoId;
+  if (!coingeckoId) {
+    return res.status(400).json({ error: "coingeckoId or trackerId missing" });
+  }
+  try {
+    const tracker = await trackerModel.create({ user_id: user.user_id, coingecko_id: coingeckoId })
+    await tracker.save();
+    return res.status(200).json({
+      tracker,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: error.message });
+  }
 }
 
 export const getUserLimitTracker = async (req: Request, res: Response) => {
@@ -24,4 +43,23 @@ export const getUserLimitTracker = async (req: Request, res: Response) => {
   return res.status(200).json({
     limitTracker,
   });
+}
+
+export const createLimitTracker = async (req: Request, res: Response) => {
+  const user = res.locals.user;
+  const coingeckoId = req.params.coingeckoId;
+  const trackerId = req.params.trackerId
+  if (!coingeckoId || !trackerId) {
+    return res.status(400).json({ error: "coingeckoId or trackerId missing" });
+  }
+  try {
+    const ltracker = await limitTrackerModel.create({ user_id: user.user_id, coingecko_id: coingeckoId, tracker_id: trackerId })
+    await ltracker.save();
+    return res.status(200).json({
+      limitTracker: ltracker,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: error.message });
+  }
 }

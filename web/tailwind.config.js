@@ -6,7 +6,13 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        "light-1": "#F5F7FB",
+        "dark-1": "#191A23",
+        "dark-2": "#101215"
+      }
+    },
   },
   plugins: [],
 }

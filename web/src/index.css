@@ -29,3 +29,16 @@ body {
   min-height: 100dvh;
   background: #101215;
 }
+
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #191A23;
+}
+
+::-webkit-scrollbar {
+  background: #101215;
+  width: 8px;
+}

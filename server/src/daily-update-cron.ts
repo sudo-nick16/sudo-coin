@@ -100,8 +100,8 @@ async function daily_update() {
   }
 }
 
-const task = cron.schedule('1 * * * * *', () => {
-  console.log("running cron");
+const task = cron.schedule('0 1 * * *', () => {
+  console.log("sending update emails");
   daily_update();
 }, {
   scheduled: true,

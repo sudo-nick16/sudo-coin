@@ -1,6 +1,6 @@
 import { Express } from 'express';
 import { login, logout, refreshToken, register } from './handlers/auth-handlers';
-import { createCoinTracker, createLimitTracker, getMe, getUserLimitTracker, getUserTrackers } from './handlers/user-handlers';
+import { createCoinTracker, createLimitTracker, deleteLimitTracker, getMe, getUserLimitTracker, getUserTrackers } from './handlers/user-handlers';
 import { getCoinInfo, getCoinPriceHistory, getTrendingCoins } from './handlers/coin-handlers';
 import { authMiddleware } from './middlewares/auth-middleware';
 
@@ -27,6 +27,7 @@ const mountRoutes = (app: Express) => {
   app.post('/trackers/:coingeckoId', authMiddleware, createCoinTracker);
   app.post('/limit-trackers/:trackerId', authMiddleware, createLimitTracker);
   app.get('/limit-trackers/:trackerId', authMiddleware, getUserLimitTracker);
+  app.delete('/limit-trackers/:limitTrackerId', authMiddleware, deleteLimitTracker);
 
   // mount coin routes
 

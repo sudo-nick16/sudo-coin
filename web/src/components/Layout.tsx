@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import Navbar from "./Navbar"
 import axios from "axios"
 import { SERVER_URL } from "../constants"
-import { RootState, setAccessToken, setUserState, useAppDispatch } from "../store/store"
+import { RootState, addAlert, setAccessToken, setUserState, useAppDispatch } from "../store/store"
 import { useSelector } from "react-redux"
 
 type LayoutProps = {
@@ -21,12 +21,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (!user.user || !user.accessToken || listening) {
       return;
     }
-    const events = new EventSource(SERVER_URL + "/price-alert");
+    const events = new EventSource(SERVER_URL + `/price-alert/${user.user.id}`);
+    console.log("listening");
 
     events.onmessage = (e) => {
+      console.log("received message");
       const parsedData = JSON.parse(e.data);
       console.log(parsedData);
+      if (parsedData.type === "alert") {
+        appDispatch(addAlert(parsedData));
+      }
     }
+
+    events.onerror = (e) => {
+      console.log(e)
+    }
+
     setListening(true);
 
   }, [user, listening])
@@ -37,7 +47,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         withCredentials: true,
       })
       if (!res.data.error) {
-        console.log(res.data.message);
         appDispatch(setAccessToken(res.data.accessToken))
         appDispatch(setUserState(res.data.user));
       }

@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import mountRoutes from "./mount-routes";
 import cors from "cors";
 import { getScrapedCoinInfo } from "./scraper";
+import limitTrackerModel from "./models/limit-tracker";
 
 var client: { [key: string]: Response } = {}
 
@@ -30,11 +31,8 @@ async function main() {
 
   mountRoutes(app);
 
-  app.get("/price-alert/:user_id/:coinId/:low/:high", (req: Request, res: Response) => {
+  app.get("/price-alert/:user_id", (req: Request, res: Response) => {
     const userId = req.params.user_id;
-    const coinId = req.params.coinId;
-    const low = req.params.low;
-    const high = req.params.high;
 
     if (!userId) {
       return res.status(400).json({ error: "user_id missing" });
@@ -51,9 +49,6 @@ async function main() {
 
     subscribeToPriceAlert({
       userId,
-      low: Number(low),
-      high: Number(high),
-      coinId,
     });
   });
 
@@ -64,13 +59,37 @@ async function main() {
 
 main();
 
-export const subscribeToPriceAlert = async ({ userId, low, high, coinId }: { userId: string, low: number, high: number, coinId: string }) => {
+export const subscribeToPriceAlert = async ({ userId }: { userId: string }) => {
   const res = client[userId];
-  const coin = await getScrapedCoinInfo(coinId);
-  if (Number(coin?.price) < low || Number(coin?.price) > high) {
-    res.write(`data: ${JSON.stringify({ low, high, coin })}\n\n`);
+  const limitTrackers = await limitTrackerModel.find({ user_id: userId }).exec();
+  console.log("traxking.....")
+  res.write(`data: ${JSON.stringify({ type: "ping" })}\n\n`);
+  for (const limitTracker of limitTrackers) {
+    const coin = await getScrapedCoinInfo(limitTracker.coingecko_id);
+    if (!coin) {
+      continue;
+    }
+    coin.price = coin.price.replace(/[$\,,]/g, "")
+
+    console.log("hello", parseFloat(coin?.price), limitTracker.lower_limit, limitTracker.upper_limit);
+    const data = {
+      type: "alert",
+      low: limitTracker.lower_limit,
+      high: limitTracker.upper_limit,
+      coin,
+      message: "",
+    }
+    if (Number(coin?.price) < limitTracker.lower_limit) {
+      data.message = `Price of ${coin?.name} has fallen below ${limitTracker.lower_limit}`;
+      await limitTrackerModel.deleteOne({ _id: limitTracker._id }).exec();
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+    } else if (Number(coin?.price) > limitTracker.upper_limit) {
+      data.message = `Price of ${coin?.name} has risen above ${limitTracker.upper_limit}`;
+      await limitTrackerModel.deleteOne({ _id: limitTracker._id }).exec();
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+    }
   }
   setTimeout(() => {
-    subscribeToPriceAlert({ userId, low, high, coinId });
-  }, 30 * 1000);
+    subscribeToPriceAlert({ userId });
+  }, 10 * 1000);
 }

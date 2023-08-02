@@ -42,12 +42,29 @@ export const createCoinTracker = async (req: Request, res: Response) => {
 export const getUserLimitTracker = async (req: Request, res: Response) => {
   const user = res.locals.user;
   const trackerId = req.params.trackerId;
-  const limitTracker = limitTrackerModel
+  const limitTracker = await limitTrackerModel
     .findOne({ user_id: user.user_id, tracker_id: trackerId })
     .exec();
   return res.status(200).json({
     limitTracker,
   });
+};
+
+export const deleteLimitTracker = async (req: Request, res: Response) => {
+  const user = res.locals.user;
+  const limitTrackerId = req.params.limitTrackerId;
+  try {
+    await limitTrackerModel
+      .deleteOne({ user_id: user.user_id, _id: limitTrackerId })
+      .exec();
+    return res.status(200).json({
+      message: "deleted"
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: error.message });
+  }
 };
 
 export const createLimitTracker = async (req: Request, res: Response) => {

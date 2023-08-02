@@ -37,3 +37,11 @@ export type User = {
   name: string;
   email: string;
 }
+
+export type Alert = {
+  message: string;
+  limitTrackerId: string;
+  coinId: string;
+  coin: ScrapedCoin;
+}
+

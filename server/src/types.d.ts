@@ -38,3 +38,10 @@ export type Tracker = {
   coin: Coin;
 }
 
+export type Alert = {
+  message: string;
+  limitTrackerId: string;
+  coinId: string;
+  coin: ScrapedCoin;
+}
+

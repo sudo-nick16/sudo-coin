@@ -2,7 +2,7 @@ import { ReactElement, useEffect, useState } from "react";
 import Container from "../components/Container";
 import { chartDays } from "../constants";
 import { ScrapedCoin, Tracker } from "../types";
-import { FaArrowDown, FaArrowUp, FaChevronDown } from "react-icons/fa";
+import { FaArrowDown, FaArrowUp, FaBitcoin, FaChevronDown } from "react-icons/fa";
 import { PiDotFill } from "react-icons/pi";
 import { HiOutlineHome } from "react-icons/hi";
 import { Line } from "react-chartjs-2";
@@ -192,7 +192,7 @@ const TrackCard = ({ coin, trackerId }: { coin: ScrapedCoin; trackerId: string }
             </div>
           </div>
         ) : (
-          <>Loading...</>
+          <span className="w-full p-10 flex items-center justify-center font-bold">Loading...</span>
         ))}
     </div>
   );
@@ -206,7 +206,6 @@ const TrackedCoins = () => {
 
   const fetchCoins = async () => {
     const res = await api.get("/trackers");
-    console.log("trackers = ", res.data);
     if (!res.data.error) {
       const trackers = await Promise.all(
         res.data.trackers.map(async (t) => {
@@ -233,7 +232,7 @@ const TrackedCoins = () => {
       className="w-full !ml-6 p-3 text-light-1 bg-dark-2 border border-dark-1 rounded-xl"
     >
       <span className="font-bold text-xl flex items-center gap-x-2">
-        <HiOutlineHome className="w-6 h-6 inline-block mr-2" />
+        <FaBitcoin className="w-6 h-6 inline-block mr-2" />
         Tracked Coins
       </span>
       <div className="grid grid-cols-5 font-bold mt-6 gap-y-2">
@@ -242,7 +241,7 @@ const TrackedCoins = () => {
         <div>Market Cap</div>
       </div>
       {loading ? (
-        <span>Loading...</span>
+        <span className="w-full p-10 flex items-center justify-center font-bold">Loading...</span>
       ) : (
         <div className="flex flex-col mt-4 gap-y-2 h-[calc(100%-6rem)] overflow-auto">
           {tracker.map((tracker, index) => {

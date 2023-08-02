@@ -1,6 +1,6 @@
 import { PayloadAction, configureStore, createSlice } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
-import { User } from "../types";
+import { Alert, User } from "../types";
 
 const authState = createSlice({
   name: "user",
@@ -24,9 +24,25 @@ const authState = createSlice({
 
 export const { setAccessToken, setUserState, logout } = authState.actions;
 
+const notif = createSlice({
+  name: "notif",
+  initialState: [] as Alert[],
+  reducers: {
+    addAlert: (state, action: PayloadAction<Alert>) => {
+      state.push(action.payload);
+    },
+    clearAlerts: () => {
+      return [];
+    } 
+  }
+})
+
+export const {addAlert, clearAlerts} = notif.actions;
+
 export const Store = configureStore({
   reducer: {
     auth: authState.reducer,
+    alert: notif.reducer,
   },
 });
 

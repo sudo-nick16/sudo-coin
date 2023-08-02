@@ -78,7 +78,7 @@ const Dashboard = () => {
       </div>
       {
         loading ? (
-          <span>Loading...</span>
+        <span className="w-full p-10 flex items-center justify-center font-bold">Loading...</span>
         ) : (
           <div className="flex flex-col mt-8 gap-y-2 h-[calc(100%-6rem)] overflow-auto">
             {

@@ -63,7 +63,7 @@ export const createLimitTracker = async (req: Request, res: Response) => {
   }
   try {
     const tracker = await trackerModel
-      .findOne({ user_id: user.user_id, tracker_id: trackerId })
+      .findOne({ user_id: user.user_id, _id: trackerId })
       .exec();
     if (!tracker) {
       return res

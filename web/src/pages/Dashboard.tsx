@@ -46,13 +46,23 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchCoins = async () => {
       const res = await axios.get(SERVER_URL + "/coins");
-      console.log(res.data.coins)
       if (res.data.coins) {
         setCoins(res.data.coins);
       }
       setLoading(false);
     }
-    fetchCoins();
+    let gTimer: NodeJS.Timeout;
+    const tm = () => {
+      console.log("polling")
+      fetchCoins();
+      gTimer = setTimeout(() => {
+        tm();
+      }, 30 * 1000);
+    }
+    tm();
+    return () => {
+      clearTimeout(gTimer);
+    }
   }, [])
 
   return (
@@ -61,8 +71,7 @@ const Dashboard = () => {
         <HiOutlineHome className="w-6 h-6 inline-block mr-2" />
         Dashboard
       </span>
-      <div className="grid grid-cols-5 font-semibold my-3 gap-y-2">
-        <div></div>
+      <div className="grid grid-cols-5 font-semibold my-5 gap-y-2">
         <div>Name</div>
         <div>Current price</div>
         <div>Market Cap</div>
@@ -76,10 +85,12 @@ const Dashboard = () => {
               coins.map((coin, index) => {
                 return (
                   <div key={index} className="grid grid-cols-5 shadow-sm shadow-dark-1 hover:bg-dark-1 p-3 rounded-xl gap-4">
-                    <img src={coin.image} alt={coin.name} className="w-10 h-10" />
-                    <div className="font-bold">
-                      <h2 className="">{coin.name}</h2>
-                      <span className="">{coin.symbol}</span>
+                    <div className="flex items-center gap-4">
+                      <img src={coin.image} alt={coin.name} className="w-10 h-10" />
+                      <div className="font-bold">
+                        <h2 className="">{coin.name}</h2>
+                        <span className="">{coin.symbol}</span>
+                      </div>
                     </div>
                     <div>
                       <span className="font-bold">${coin.price}</span>

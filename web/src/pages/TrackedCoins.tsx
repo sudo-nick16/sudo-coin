@@ -80,17 +80,16 @@ const TrackCard = ({ coin, trackerId }: { coin: ScrapedCoin; trackerId: string }
       return;
     }
     const data = {
-      lowLimit: limit.low,
-      highLimit: limit.high,
+      ...limit
     }
-    const resp = await api.post(`/limit-trackers/${trackerId}`, {...data });
+    const resp = await api.post(`/limit-trackers/${trackerId}`, { ...data });
     if (!resp.data.error) {
       console.log(resp.data.limitTracker);
     }
   }
 
   useEffect(() => {
-    // handleShowPriceHistory();
+    handleShowPriceHistory();
   }, [days]);
 
   return (
@@ -126,8 +125,9 @@ const TrackCard = ({ coin, trackerId }: { coin: ScrapedCoin; trackerId: string }
       </div>
       {showPriceHistory &&
         (!loading ? (
-          <div className="my-6">
+          <div className="my-6 px-10 flex flex-col gap-x-10 xl:flex-row justify-center">
             <Line
+              className="max-w-[800px] max-h-[500px]"
               data={{
                 labels: priceHistory.map((coin) => {
                   const date = new Date(coin[0]);
@@ -154,8 +154,8 @@ const TrackCard = ({ coin, trackerId }: { coin: ScrapedCoin; trackerId: string }
                 },
               }}
             />
-            <div className="flex flex-col items-center">
-              <div className="flex gap-3 mx-auto w-fit my-4">
+            <div className="flex flex-col items-start justify-between xl:max-w-[10rem]">
+              <div className="flex flex-wrap xl:flex-col gap-3 w-full my-4">
                 {chartDays.map((d, i) => {
                   return (
                     <Button
@@ -169,10 +169,10 @@ const TrackCard = ({ coin, trackerId }: { coin: ScrapedCoin; trackerId: string }
                   );
                 })}
               </div>
-              <div>
+              <div className="flex flex-wrap xl:flex-col gap-4 w-full">
                 <Input
                   type="text"
-                  className="w-30"
+                  className="xl:w-full"
                   value={limit.low}
                   onChange={(e) => {
                     setLimit(l => ({ ...l, low: e.target.value }))
@@ -182,11 +182,12 @@ const TrackCard = ({ coin, trackerId }: { coin: ScrapedCoin; trackerId: string }
                 <Input
                   value={limit.high}
                   type="text"
+                  className="xl:w-full"
                   onChange={(e) => {
                     setLimit(l => ({ ...l, high: e.target.value }))
                   }}
                   placeholder="High Limit" />
-                <Button onClick={handleCreateLimitTracker}>Create Limit Tracker</Button>
+                <Button className="!w-fit xl:w-auto" onClick={handleCreateLimitTracker}>Create Limit Tracker</Button>
               </div>
             </div>
           </div>
@@ -245,7 +246,8 @@ const TrackedCoins = () => {
       ) : (
         <div className="flex flex-col mt-4 gap-y-2 h-[calc(100%-6rem)] overflow-auto">
           {tracker.map((tracker, index) => {
-            return <TrackCard coin={tracker.coin} trackerId={tracker.id} key={index} />;
+            console.log(tracker)
+            return <TrackCard coin={tracker.coin} trackerId={tracker._id} key={index} />;
           })}
         </div>
       )}

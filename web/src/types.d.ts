@@ -28,7 +28,7 @@ export type ScrapedCoin = {
 export type Tracker = {
   coingeckoId: string;
   user_id: string;
-  id: string;
+  _id: string;
   coin: ScrapedCoin;
 }
 

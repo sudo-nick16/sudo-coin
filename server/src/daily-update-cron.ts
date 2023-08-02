@@ -1,10 +1,11 @@
 import nodemailer from "nodemailer";
-import axios from "axios";
 import mongoose from "mongoose";
 import { MONGO_URI, SMTP_PASS, SMTP_USER } from "./constants";
 import userModel from "./models/user";
 import trackerModel from "./models/tracker";
-import { Coin, Tracker } from "./types";
+import { ScrapedCoin, Tracker } from "./types";
+import { getScrapedCoinInfo } from "./scraper";
+import cron from "node-cron";
 
 const transporter = nodemailer.createTransport({
   host: "smtp.forwardemail.net",
@@ -26,7 +27,7 @@ async function sendMail(to: string, body: string) {
   console.log("Message sent: %s", info.messageId);
 }
 
-const getCoinHtml = (coin: Coin) => {
+const getCoinHtml = (coin: ScrapedCoin) => {
   return `
   <div style='display: flex;'>
     <div style='display: flex; flex-direction: column;'>
@@ -34,14 +35,14 @@ const getCoinHtml = (coin: Coin) => {
       <h2>${coin.name}</h2>
     </div>
     <div style='display: flex; flex-direction: column;'>
-      <span>low: ${coin.low_24h}</span>
-      <span>high: ${coin.high_24h}</span>
+      <span>Price: ${coin.price}</span>
+      <span>Change 24h: ${coin.change24h}</span>
     </div> 
   <div>
   `
 }
 
-async function init() {
+async function daily_update() {
   try {
     await mongoose.connect(MONGO_URI, {
       authSource: "admin",
@@ -61,23 +62,21 @@ async function init() {
     }
     let body = '';
     for (let j = 0; j < trackers.length; ++j) {
-      const resp = await axios.get(`https://api.coingecko.com/api/v3/coins/${trackers[i].coingeckoId}`);
-      const coin = resp.data;
-      const coinData: Coin = {
-        id: coin.id,
-        symbol: coin.symbol,
-        name: coin.name,
-        image: coin.image.large,
-        price_change_percentage_24h_in_currency: coin.market_data.price_change_percentage_24h_in_currency.usd,
-        current_price: coin.market_data.current_price.usd,
-        market_cap: coin.market_data.market_cap.usd,
-        low_24h: coin.market_data.low_24h.usd,
-        high_24h: coin.market_data.high_24h.usd,
+      const coin = await getScrapedCoinInfo(trackers[j].coingeckoId);
+      if (!coin) {
+        continue;
       }
-      body += getCoinHtml(coinData);
+      body += getCoinHtml(coin);
     }
     sendMail(users[i].email, body);
   }
 }
 
-init();
+const task = cron.schedule('0 1 * * *', () => {
+  daily_update();
+}, {
+  scheduled: true,
+  timezone: "Asia/Kolkata"
+});
+
+task.start();

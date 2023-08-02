@@ -100,7 +100,10 @@ async function daily_update() {
   }
 }
 
-const task = cron.schedule('0 1 * * *', () => {
+// const everyMin = '1 * * * * *';
+const everyDayAt1 = '0 1 * * *';
+
+const task = cron.schedule(everyDayAt1, () => {
   console.log("sending update emails");
   daily_update();
 }, {

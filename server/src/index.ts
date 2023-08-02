@@ -13,14 +13,12 @@ var client: { [key: string]: Response } = {}
 async function main() {
   const app = express();
   app.use(express.json());
+  app.use(express.static("public"));
   app.use(cookieParser());
-  console.log("ORIGIN:", ORIGIN);
   app.use(cors({
     origin: ORIGIN,
     credentials: true,
   }));
-
-  console.log(await getScrapedCoinInfo("bitcoin"));
 
   try {
     await mongoose.connect(MONGO_URI, {
@@ -51,6 +49,8 @@ async function main() {
     subscribeToPriceAlert({
       userId,
     });
+
+    return;
   });
 
   app.listen(PORT, () => {

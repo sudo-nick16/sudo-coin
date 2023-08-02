@@ -1,0 +1,25 @@
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    environment:
+      mongo_initdb_root_username: root
+      mongo_initdb_root_password: cooldb123
+    volumes:
+      - ./vol/mongo/data:/data/db
+    ports:
+      - 27017:27017
+
+  server:
+    container_name: server
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./server/.env
+    ports:
+      - 3000:3000
+    depends_on:
+      - mongodb

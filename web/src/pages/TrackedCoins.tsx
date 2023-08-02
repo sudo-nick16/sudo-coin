@@ -4,7 +4,6 @@ import { chartDays } from "../constants";
 import { ScrapedCoin, Tracker } from "../types";
 import { FaArrowDown, FaArrowUp, FaBitcoin, FaChevronDown } from "react-icons/fa";
 import { PiDotFill } from "react-icons/pi";
-import { HiOutlineHome } from "react-icons/hi";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -208,7 +207,7 @@ const TrackedCoins = () => {
     const res = await api.get("/trackers");
     if (!res.data.error) {
       const trackers = await Promise.all(
-        res.data.trackers.map(async (t) => {
+        res.data.trackers.map(async (t: {coingecko_id: string}) => {
           const r = await api.get(`/coins/${t.coingecko_id}`);
           return {
             ...t,
